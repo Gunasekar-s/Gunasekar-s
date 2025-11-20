@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Analytics</title>
+    <script src="https://live.zwidgets.com/js-sdk/1.2/ZohoEmbededAppSDK.min.js"></script>
+    <style>
+        body { margin: 0; padding: 0; }
+        #related-list { width: 100%; min-height: 600px; }
+        iframe { width: 100%; height: 600px; border: none; }
+    </style>
+</head>
+<body>
+    <div id="related-list">Loading Analytics Dashboard...</div>
+    
+    <script>
+        ZOHO.embeddedApp.on("PageLoad", function(data){
+            try {
+                const recordId = data.EntityId;
+                
+                ZOHO.CRM.API.getRecord({
+                    Entity: data.Entity,
+                    RecordID: recordId
+                })
+                .then(function(response){
+                    const account = response.data[0];
+                    
+                    const osheId1 = account.OSHE_ID || '';
+                    const osheId2 = account.OSHE_ID_2 || '';
+                    const osheId3 = account.OSHE_ID_3 || '';
+                    
+                    const filters = [];
+                    if(osheId1 && osheId1.trim()) {
+                        filters.push('"EMPLOYER_ID"=\'' + osheId1.trim() + '\'');
+                    }
+                    if(osheId2 && osheId2.trim()) {
+                        filters.push('"EMPLOYER_ID"=\'' + osheId2.trim() + '\'');
+                    }
+                    if(osheId3 && osheId3.trim()) {
+                        filters.push('"EMPLOYER_ID"=\'' + osheId3.trim() + '\'');
+                    }
+                    
+                    let url = "https://analytics.zoho.in/open-view/421888000000309402";
+                    if(filters.length > 0){
+                        url += "&ZOHO_CRITERIA=" + encodeURIComponent(filters.join(' OR '));
+                    }
+                    
+                    document.getElementById("related-list").innerHTML = 
+                        '<iframe src="' + url + '"></iframe>';
+                })
+                .catch(function(err){
+                    document.getElementById("related-list").innerHTML = 
+                        '<p>Error loading data: ' + err + '</p>';
+                });
+            } catch(e) {
+                document.getElementById("related-list").innerHTML = 
+                    '<p>Error: ' + e.message + '</p>';
+            }
+        });
+        
+        ZOHO.embeddedApp.init();
+    </script>
+</body>
+</html>
